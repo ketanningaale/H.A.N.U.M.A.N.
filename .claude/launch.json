@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "HANUMAN UI",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "/Users/snowdropp/Documents/GitHub/H.A.N.U.M.A.N./ui",
+      "port": 5173
+    }
+  ]
+}

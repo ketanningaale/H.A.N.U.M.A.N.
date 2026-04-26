@@ -132,9 +132,9 @@ export default function App() {
     <div className="flex flex-col h-screen max-w-3xl mx-auto px-7 pb-6 select-none">
 
       {/* Top bar */}
-      <div className="flex items-center justify-between h-11 border-b border-white/[0.06] shrink-0">
-        <span className="text-[11px] tracking-[0.3em] text-[#00d4ff]/35 uppercase font-mono">
-          H · A · N · U · M · A · N
+      <div className="flex items-center justify-between h-11 border-b border-white/[0.06] shrink-0 gap-4">
+        <span className="text-[10px] tracking-[0.2em] text-[#00d4ff]/35 uppercase font-mono whitespace-nowrap shrink-0">
+          H·A·N·U·M·A·N
         </span>
         <div className="flex items-center gap-5 text-[9px] tracking-[0.14em] uppercase text-zinc-600">
           <div className="flex items-center gap-1.5">
@@ -152,7 +152,7 @@ export default function App() {
       </div>
 
       {/* Stage */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-5 min-h-0">
+      <div className="flex flex-col items-center justify-center gap-4 py-6 min-h-0">
 
         {/* Orb + mic waveform overlay */}
         <div className="relative w-60 h-60">
@@ -182,7 +182,7 @@ export default function App() {
       </div>
 
       {/* Transcript + input */}
-      <div className="flex flex-col border-t border-white/[0.06] pt-4 h-[200px] gap-0">
+      <div className="flex flex-col border-t border-white/[0.06] pt-4 flex-1 min-h-0 gap-0">
         <div ref={transcriptRef} className="flex-1 overflow-y-auto flex flex-col gap-1.5 min-h-0 pb-2">
           {turns.map((t, i) => (
             <div key={i} className="flex gap-3 text-[11px] leading-[1.55]">

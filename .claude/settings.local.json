@@ -20,7 +20,10 @@
       "Bash(npx @elevenlabs/cli@latest components add shimmering-text)",
       "Bash(npx @elevenlabs/cli@latest components add live-waveform)",
       "Bash(cp -r /Users/snowdropp/Documents/GitHub/H.A.N.U.M.A.N./ui/@/components /Users/snowdropp/Documents/GitHub/H.A.N.U.M.A.N./ui/src/)",
-      "Bash(cp -r /Users/snowdropp/Documents/GitHub/H.A.N.U.M.A.N./ui/@/lib /Users/snowdropp/Documents/GitHub/H.A.N.U.M.A.N./ui/src/)"
+      "Bash(cp -r /Users/snowdropp/Documents/GitHub/H.A.N.U.M.A.N./ui/@/lib /Users/snowdropp/Documents/GitHub/H.A.N.U.M.A.N./ui/src/)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:4173/)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }
