@@ -80,7 +80,7 @@ H.A.N.U.M.A.N/
 git clone https://github.com/yourname/H.A.N.U.M.A.N.
 cd H.A.N.U.M.A.N.
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 

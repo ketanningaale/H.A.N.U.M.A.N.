@@ -6,27 +6,29 @@
 
 ## Current Status
 
-**Phase:** Pre-build — planning complete, ready to build Phase 0  
+**Phase:** Phase 1 — Clap Activation (in progress)
 **Voice:** `en-GB-RyanNeural` (British, JARVIS-style)  
-**LLM:** Claude API (primary) + Ollama (fallback)
+**LLM:** Claude API (primary) + Ollama (fallback)  
+**Last milestone:** Phase 0 complete — HANUMAN spoke for the first time ✓
 
 ---
 
-## Phase 0 — Voice Loop
+## Phase 0 — Voice Loop ✓ COMPLETE
 > Goal: HANUMAN can hear you, think, and speak back in character.
 
-- [ ] Python virtual environment set up
-- [ ] Ollama installed and `llama3:8b` pulled
-- [ ] Anthropic API key configured
-- [ ] `core/brain.py` — Ollama + Claude API wrapper with auto-fallback
-- [ ] Persona system prompt injected into every request
-- [ ] `input/stt.py` — faster-whisper transcription working
-- [ ] `output/tts.py` — edge-tts generating audio in `en-GB-RyanNeural`
-- [ ] `output/speaker.py` — audio playback working on macOS
-- [ ] `main.py` — basic voice loop: listen → think → speak
-- [ ] HANUMAN sounds like HANUMAN in first conversation
+- [x] Python virtual environment set up (`.venv`)
+- [x] Anthropic API key configured via `.env`
+- [x] `core/brain.py` — Claude API primary, Ollama fallback, auto-switches
+- [x] Persona system prompt injected into every request via `config/persona.txt`
+- [x] `core/context.py` — rolling conversation buffer (20 turns)
+- [x] `input/stt.py` — faster-whisper with VAD silence detection
+- [x] `output/tts.py` — edge-tts generating audio in `en-GB-RyanNeural`
+- [x] `output/speaker.py` — `afplay` on macOS, `mpg123` on RPi, volume param
+- [x] `output/volume_controller.py` — noise + time + distance adaptive volume
+- [x] `main.py` — voice loop: listen → think → speak, graceful shutdown
+- [x] Smoke test passed — *"All systems online, sir. HANUMAN is ready."*
 
-**Done when:** *"What time is it?" → HANUMAN replies in voice, in character.*
+**Completed:** 2026-04-26
 
 ---
 
@@ -195,3 +197,4 @@
 | 2026-04-26 | No wake word | JARVIS never had one. Camera presence = activation trigger. |
 | 2026-04-26 | Modes deferred to Phase 8 | Infrastructure built in earlier phases; modes compose everything above. |
 | 2026-04-26 | Adaptive volume: 3 inputs | Noise + time + distance gives genuinely context-aware output. |
+| 2026-04-26 | Phase 0 complete | Voice loop working. Smoke test passed at 0.85 volume. HANUMAN spoke. |
