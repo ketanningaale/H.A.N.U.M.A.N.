@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Orb, type AgentState } from '@/components/ui/orb'
-import { MicrophoneWaveform } from '@/components/ui/waveform'
+import { ParticleRing } from '@/components/ui/particle-ring'
 import { ShimmeringText } from '@/components/ui/shimmering-text'
 import './index.css'
 
@@ -154,14 +154,10 @@ export default function App() {
       {/* Stage */}
       <div className="flex flex-col items-center justify-center gap-4 py-6 min-h-0">
 
-        {/* Orb + mic waveform overlay */}
+        {/* Orb + particle ring */}
         <div className="relative w-60 h-60">
           <Orb agentState={toAgentState(hud.status)} colors={orbColors} className="w-full h-full" />
-          {hud.status === 'listening' && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-28 opacity-50">
-              <MicrophoneWaveform active processing={false} barWidth={2} className="h-5" />
-            </div>
-          )}
+          <ParticleRing state={hud.status} colors={orbColors} size={320} />
         </div>
 
         {/* Status label */}
