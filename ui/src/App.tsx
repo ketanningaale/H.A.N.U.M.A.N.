@@ -86,7 +86,7 @@ export default function App() {
     const id = setInterval(() => {
       speakHueRef.current = (speakHueRef.current + 1.8) % 360
       const h1 = speakHueRef.current
-      setOrbColors([`hsl(${h1},90%,55%)`, `hsl(${(h1 + 120) % 360},90%,45%)`])
+      setOrbColors([`hsl(${h1},90%,55%)`, `hsl(${(h1 + 60) % 360},90%,48%)`])
     }, 30)
     return () => clearInterval(id)
   }, [hud.status])
