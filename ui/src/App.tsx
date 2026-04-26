@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Orb, type AgentState } from '@/components/ui/orb'
 import { ParticleRing } from '@/components/ui/particle-ring'
 import { ShimmeringText } from '@/components/ui/shimmering-text'
 import './index.css'
@@ -17,13 +16,6 @@ interface HUDState {
   presence:  Presence
   volume:    number
   connected: boolean
-}
-
-const toAgentState = (s: HanumanStatus): AgentState => {
-  if (s === 'listening') return 'listening'
-  if (s === 'thinking')  return 'thinking'
-  if (s === 'speaking')  return 'talking'
-  return null
 }
 
 const ORB_COLORS: Record<HanumanStatus, [string, string]> = {
@@ -87,7 +79,7 @@ export default function App() {
   const transcriptRef = useRef<HTMLDivElement>(null)
   const speakHueRef   = useRef(0)
 
-  // Hue-cycle orb when speaking
+  // Hue-cycle particle colors when speaking
   useEffect(() => {
     setOrbColors(ORB_COLORS[hud.status])
     if (hud.status !== 'speaking') return
@@ -152,12 +144,11 @@ export default function App() {
       </div>
 
       {/* Stage */}
-      <div className="flex flex-col items-center justify-center gap-4 py-6 min-h-0">
+      <div className="flex flex-col items-center justify-center gap-2 pt-2 pb-1 shrink-0">
 
-        {/* Orb + particle ring */}
-        <div className="relative w-60 h-60">
-          <Orb agentState={toAgentState(hud.status)} colors={orbColors} className="w-full h-full" />
-          <ParticleRing state={hud.status} colors={orbColors} size={320} />
+        {/* Particle sphere — div owns the full canvas footprint */}
+        <div className="relative w-[360px] h-[360px] shrink-0">
+          <ParticleRing state={hud.status} colors={orbColors} />
         </div>
 
         {/* Status label */}
