@@ -1,0 +1,40 @@
+# ── LLM ───────────────────────────────────────────────────────────────────────
+anthropic>=0.40.0          # Claude API (primary LLM + vision)
+ollama>=0.4.0              # Ollama Python client (offline fallback)
+
+# ── Speech-to-Text ────────────────────────────────────────────────────────────
+faster-whisper>=1.0.0      # Local Whisper transcription (medium on M4, tiny on RPi)
+
+# ── Text-to-Speech ────────────────────────────────────────────────────────────
+edge-tts>=7.0.0            # Microsoft neural TTS — en-GB-RyanNeural (M4)
+# piper-tts                # Uncomment for RPi deployment (install separately via pip)
+
+# ── Audio ─────────────────────────────────────────────────────────────────────
+sounddevice>=0.5.0         # Mic input, ambient noise monitoring, clap detection
+soundfile>=0.12.0          # Audio file read/write
+numpy>=1.26.0              # Audio signal processing (RMS, amplitude)
+
+# ── Camera & Vision ───────────────────────────────────────────────────────────
+opencv-python>=4.9.0       # RTSP stream capture and frame processing
+face-recognition>=1.3.0    # Face encoding, detection, and identification (dlib-based)
+
+# ── Web & Search ──────────────────────────────────────────────────────────────
+duckduckgo-search>=6.0.0   # Web search, no API key required
+httpx>=0.27.0              # Async HTTP client for Home Assistant and other APIs
+requests>=2.31.0           # Sync HTTP for simple tool calls
+
+# ── API & Backend ─────────────────────────────────────────────────────────────
+fastapi>=0.115.0           # REST API server for web UI and remote access
+uvicorn[standard]>=0.30.0  # ASGI server for FastAPI
+
+# ── Configuration & Environment ───────────────────────────────────────────────
+python-dotenv>=1.0.0       # Load .env variables
+PyYAML>=6.0.0              # config/settings.yaml parsing
+
+# ── Memory ────────────────────────────────────────────────────────────────────
+# SQLite is built into Python — no extra package needed
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+pyaudio>=0.2.14            # Audio playback (fallback if afplay/mpg123 unavailable)
+schedule>=1.2.0            # Cron-style scheduling for proactive alerts
+python-dateutil>=2.9.0     # Natural language date parsing for calendar tool
