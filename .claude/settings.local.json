@@ -23,7 +23,15 @@
       "Bash(cp -r /Users/snowdropp/Documents/GitHub/H.A.N.U.M.A.N./ui/@/lib /Users/snowdropp/Documents/GitHub/H.A.N.U.M.A.N./ui/src/)",
       "Bash(npm run *)",
       "Bash(curl -s http://localhost:4173/)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(python -c \"import dotenv; from dotenv import load_dotenv; load_dotenv\\(\\); import os; key = os.getenv\\('ANTHROPIC_API_KEY'\\); print\\('API key:', 'set' if key else 'MISSING'\\)\")",
+      "Bash(ollama list *)",
+      "Bash(curl -s http://localhost:8000/status)",
+      "Bash(pkill -f \"python main.py\")",
+      "Bash(pkill -f \"uvicorn\")",
+      "Bash(pkill -f \"vite\")",
+      "Bash(kill -9 55692)",
+      "Bash(brew install *)"
     ]
   }
 }
