@@ -8,6 +8,7 @@ import asyncio
 import logging
 import os
 import threading
+from typing import Optional
 
 import uvicorn
 import yaml
@@ -57,7 +58,7 @@ def _broadcast_message(role: str, text: str):
         pass
 
 
-def speak(text: str, context: ConversationContext | None = None):
+def speak(text: str, context: Optional[ConversationContext] = None):
     _broadcast("speaking")
     logger.info(f"HANUMAN: {text}")
     if context:

@@ -1,6 +1,7 @@
 import io
 import logging
 import tempfile
+from typing import Optional
 import numpy as np
 import sounddevice as sd
 import soundfile as sf
@@ -9,7 +10,7 @@ from faster_whisper import WhisperModel
 
 logger = logging.getLogger(__name__)
 
-_model: WhisperModel | None = None
+_model: Optional[WhisperModel] = None
 
 
 def _cfg() -> dict:

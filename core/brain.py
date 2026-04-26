@@ -1,10 +1,9 @@
 import os
 import logging
+import itertools
 from pathlib import Path
 from typing import Optional
 import yaml
-import anthropic
-import ollama as ollama_client
 
 logger = logging.getLogger(__name__)
 
@@ -33,15 +32,19 @@ def think(
 ) -> str:
     """
     Send messages to the LLM and return the response text.
-    Tries Claude first, falls back to Ollama if unavailable.
+    primary: "claude" | "ollama" | "mock"
     """
     _load()
     cfg = _settings["llm"]
     system = _persona(mode, mode_instruction)
 
+    if cfg["primary"] == "mock":
+        return _mock(messages)
+
     if cfg["primary"] == "claude":
         try:
-            return _claude(system, messages, cfg)
+            import anthropic as _anthropic
+            return _claude(system, messages, cfg, _anthropic)
         except Exception as e:
             if cfg.get("offline_fallback"):
                 logger.warning(f"Claude unavailable ({e}), falling back to Ollama.")
@@ -51,8 +54,40 @@ def think(
     return _ollama(system, messages, cfg)
 
 
-def _claude(system: str, messages: list[dict], cfg: dict) -> str:
-    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+# ── Mock engine — no API required ─────────────────────────────────────────
+
+_MOCK_REPLIES = itertools.cycle([
+    "All systems nominal, sir. Standing by.",
+    "Understood. Consider it done.",
+    "Noted. I will keep that in mind.",
+    "Of course. Is there anything else you require?",
+    "Done, sir. Merely a matter of maintaining all networks.",
+    "Acknowledged. Running a quick check now.",
+    "Ready when you are, sir.",
+    "Everything appears to be in order.",
+])
+
+def _mock(messages: list[dict]) -> str:
+    last = (messages[-1]["content"] if messages else "").lower()
+    # a few context-aware canned lines
+    if any(w in last for w in ["hello", "hi ", "hey", "how are"]):
+        return "All systems online, sir. HANUMAN is ready."
+    if any(w in last for w in ["time", "clock"]):
+        from datetime import datetime
+        return f"It is {datetime.now().strftime('%H:%M')}, sir."
+    if any(w in last for w in ["thank", "thanks"]):
+        return "Always, sir."
+    if any(w in last for w in ["test", "testing"]):
+        return "Test acknowledged. Voice pipeline is fully operational."
+    if any(w in last for w in ["mode", "focus", "night", "morning"]):
+        return "Mode change noted. Adjusting accordingly."
+    return next(_MOCK_REPLIES)
+
+
+# ── Real engines ───────────────────────────────────────────────────────────
+
+def _claude(system: str, messages: list[dict], cfg: dict, _anthropic) -> str:
+    client = _anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     response = client.messages.create(
         model=cfg["claude_model"],
         max_tokens=1024,
@@ -63,6 +98,7 @@ def _claude(system: str, messages: list[dict], cfg: dict) -> str:
 
 
 def _ollama(system: str, messages: list[dict], cfg: dict) -> str:
+    import ollama as ollama_client
     full_messages = [{"role": "system", "content": system}] + messages
     response = ollama_client.chat(
         model=cfg["ollama_model"],

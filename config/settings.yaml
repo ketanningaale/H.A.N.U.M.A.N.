@@ -1,5 +1,6 @@
 llm:
-  primary: claude                        # "claude" or "ollama"
+  primary: mock                          # "claude", "ollama", or "mock" (no API needed)
+  # primary: claude                      # uncomment when API key is ready
   claude_model: claude-sonnet-4-6
   ollama_model: llama3:8b                # change to phi3:mini for RPi
   ollama_host: http://localhost:11434
