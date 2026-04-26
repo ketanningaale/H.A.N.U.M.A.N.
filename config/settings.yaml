@@ -1,0 +1,81 @@
+llm:
+  primary: claude                        # "claude" or "ollama"
+  claude_model: claude-sonnet-4-6
+  ollama_model: llama3:8b                # change to phi3:mini for RPi
+  ollama_host: http://localhost:11434
+  context_window: 4096
+  offline_fallback: true                 # fall back to ollama if claude unreachable
+
+stt:
+  model: medium                          # change to tiny for RPi
+  language: en
+  device: auto                           # auto = Metal on M4, CPU on RPi
+  vad_threshold: 0.5                     # voice activity detection sensitivity
+
+tts:
+  provider: edge-tts                     # change to piper for RPi
+  voice: en-GB-RyanNeural
+  rate: "-5%"                            # slightly slower = more gravitas
+
+volume:
+  base: 0.85
+  min: 0.25
+  max: 1.0
+  # noise thresholds (ambient dB → multiplier)
+  noise_map:
+    - { max_db: 35, multiplier: 0.6 }
+    - { max_db: 45, multiplier: 0.8 }
+    - { max_db: 55, multiplier: 1.0 }
+    - { max_db: 65, multiplier: 1.2 }
+    - { max_db: 999, multiplier: 1.4 }
+  # time of day multipliers (hour → multiplier)
+  time_map:
+    - { start: 0,  end: 6,  multiplier: 0.4 }
+    - { start: 6,  end: 9,  multiplier: 0.8 }
+    - { start: 9,  end: 22, multiplier: 1.0 }
+    - { start: 22, end: 23, multiplier: 0.7 }
+    - { start: 23, end: 24, multiplier: 0.4 }
+  # face bounding box height → multiplier
+  distance_map:
+    - { min_px: 200, multiplier: 0.7 }
+    - { min_px: 150, multiplier: 0.85 }
+    - { min_px: 100, multiplier: 1.0 }
+    - { min_px: 50,  multiplier: 1.2 }
+    - { min_px: 0,   multiplier: 1.4 }
+
+camera:
+  rtsp_url: ""                           # set via CAMERA_RTSP_URL in .env
+  idle_fps: 0.5                          # frames/sec when no presence detected
+  active_fps: 2.0                        # frames/sec when someone is present
+  away_timeout_minutes: 10
+
+clap:
+  sensitivity: 0.7                       # amplitude threshold (0.0–1.0)
+  max_duration_ms: 150                   # max ms for a valid clap spike
+  window_ms: 1500                        # time window to count multi-claps
+  single_action: toggle_listen
+  double_action: cycle_mode
+  triple_action: status_report
+
+modes:
+  default: NORMAL
+  auto_morning_hour: 6
+  auto_night_hour: 22
+
+memory:
+  short_term_turns: 20
+  db_path: memory/hanuman.db
+
+persona:
+  prompt_file: config/persona.txt
+  address: sir
+
+lights:
+  enabled: false                         # set to true when Home Assistant is ready
+  home_assistant_url: ""                 # set via HOME_ASSISTANT_URL in .env
+  home_assistant_token: ""              # set via HOME_ASSISTANT_TOKEN in .env
+
+api:
+  host: 0.0.0.0
+  port: 8000
+  token: ""                             # set via HANUMAN_API_TOKEN in .env
