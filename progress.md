@@ -159,8 +159,8 @@
 ## Web UI & API ✓ COMPLETE (built alongside Phase 0)
 > Goal: Interact with HANUMAN from any device on the network.
 
-- [x] `ui/index.html` — minimalist dark HUD, multicolor radial waveform circle
-- [x] Waveform animates per state: idle (breathe) / listening (pulse) / thinking (sweep) / speaking (full multicolor)
+- [x] `ui/index.html` — minimalist dark HUD with ElevenLabs Orb (Three.js WebGL blob)
+- [x] Orb animates per state: idle (dim breathe) / listening (cyan pulse) / thinking (blue/purple sweep) / speaking (full multicolor hue cycle)
 - [x] Top bar: presence dot, mode badge, connection indicator
 - [x] Live transcript with user / HANUMAN turns
 - [x] Text input fallback for typed commands
@@ -202,4 +202,4 @@
 | 2026-04-26 | Modes deferred to Phase 8 | Infrastructure built in earlier phases; modes compose everything above. |
 | 2026-04-26 | Adaptive volume: 3 inputs | Noise + time + distance gives genuinely context-aware output. |
 | 2026-04-26 | Phase 0 complete | Voice loop working. Smoke test passed at 0.85 volume. HANUMAN spoke. |
-| 2026-04-26 | HUD UI built early | Minimalist dark HUD with multicolor radial waveform. WebSocket-connected to voice loop. Demo mode when backend offline. |
+| 2026-04-26 | HUD UI built early | Minimalist dark HUD with ElevenLabs Orb shader (Three.js). Siri-like fluid blob, multicolor hue cycling when speaking. WebSocket-connected. |

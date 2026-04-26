@@ -5,22 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HANUMAN</title>
   <style>
-    /* ── Reset & Base ─────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #07090f;
-      --surface:   #0d1117;
-      --border:    rgba(255,255,255,0.06);
-      --text:      #c8d6e5;
-      --muted:     #4a5568;
-      --cyan:      #00d4ff;
-      --blue:      #3b82f6;
-      --purple:    #7c3aed;
-      --magenta:   #d946ef;
-      --gold:      #f59e0b;
-      --green:     #10b981;
-      --red:       #ef4444;
+      --bg:      #07090f;
+      --surface: #0d1117;
+      --border:  rgba(255,255,255,0.06);
+      --text:    #c8d6e5;
+      --muted:   #3a4455;
+      --cyan:    #00d4ff;
+      --blue:    #3b82f6;
+      --purple:  #7c3aed;
+      --magenta: #d946ef;
+      --gold:    #f59e0b;
+      --green:   #10b981;
+      --red:     #ef4444;
     }
 
     html, body {
@@ -31,155 +30,151 @@
       overflow: hidden;
     }
 
-    /* ── Layout ───────────────────────────────────────────────────────── */
     .hud {
       display: grid;
-      grid-template-rows: 48px 1fr 200px;
+      grid-template-rows: 44px 1fr 210px;
       height: 100vh;
-      max-width: 900px;
+      max-width: 860px;
       margin: 0 auto;
-      padding: 0 24px 24px;
+      padding: 0 28px 24px;
     }
 
-    /* ── Top Bar ──────────────────────────────────────────────────────── */
+    /* ── Top Bar ─────────────────────────────────────────────────────── */
     .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border);
-      font-size: 11px;
-      letter-spacing: 0.12em;
+      font-size: 10px;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--muted);
     }
 
-    .topbar .wordmark {
-      color: var(--cyan);
-      letter-spacing: 0.25em;
-      font-size: 12px;
+    .wordmark {
+      color: rgba(0, 212, 255, 0.6);
+      letter-spacing: 0.28em;
+      font-size: 11px;
     }
 
-    .topbar .indicators {
-      display: flex;
-      gap: 24px;
-      align-items: center;
-    }
+    .indicators { display: flex; gap: 20px; align-items: center; }
 
-    .indicator {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .indicator { display: flex; align-items: center; gap: 6px; }
 
     .dot {
-      width: 6px;
-      height: 6px;
+      width: 5px; height: 5px;
       border-radius: 50%;
       background: var(--muted);
+      transition: background 0.4s, box-shadow 0.4s;
     }
-
-    .dot.online  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .dot.online  { background: var(--green);  box-shadow: 0 0 6px var(--green); }
     .dot.offline { background: var(--red); }
-    .dot.away    { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+    .dot.away    { background: var(--gold);   box-shadow: 0 0 5px var(--gold); }
 
-    /* ── Centre Stage ─────────────────────────────────────────────────── */
+    .mode-badge {
+      padding: 2px 7px;
+      border: 1px solid currentColor;
+      border-radius: 2px;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      transition: color 0.4s, border-color 0.4s;
+    }
+    .mode-NORMAL   { color: rgba(0,212,255,0.5); }
+    .mode-FOCUS    { color: rgba(59,130,246,0.6); }
+    .mode-NIGHT    { color: rgba(124,58,237,0.5); }
+    .mode-WINDDOWN { color: rgba(245,158,11,0.5); }
+    .mode-MOODY    { color: rgba(217,70,239,0.5); }
+    .mode-MORNING  { color: rgba(245,158,11,0.6); }
+    .mode-AWAY     { color: var(--muted); }
+
+    /* ── Stage ───────────────────────────────────────────────────────── */
     .stage {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 28px;
+      gap: 24px;
       position: relative;
     }
 
-    /* ── Waveform Canvas ──────────────────────────────────────────────── */
-    .canvas-wrap {
-      position: relative;
-      width: 260px;
-      height: 260px;
+    #orbCanvas {
+      width: 280px;
+      height: 280px;
+      display: block;
     }
 
-    #waveCanvas {
-      position: absolute;
-      inset: 0;
-    }
-
-    /* ── Status Label ─────────────────────────────────────────────────── */
     .status-label {
-      font-size: 11px;
-      letter-spacing: 0.2em;
+      font-size: 10px;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
       color: var(--muted);
-      transition: color 0.4s;
-      min-height: 16px;
+      transition: color 0.5s;
+      min-height: 14px;
     }
+    .status-label.listening { color: rgba(0,212,255,0.7); }
+    .status-label.thinking  { color: rgba(59,130,246,0.7); }
+    .status-label.speaking  { color: rgba(217,70,239,0.7); }
 
-    .status-label.listening { color: var(--cyan); }
-    .status-label.thinking  { color: var(--blue); }
-    .status-label.speaking  { color: var(--magenta); }
-
-    /* ── Last Utterance ───────────────────────────────────────────────── */
     .last-utterance {
-      font-size: 14px;
-      color: var(--text);
+      font-size: 13px;
+      color: rgba(200,214,229,0.7);
       text-align: center;
-      max-width: 520px;
-      line-height: 1.6;
-      min-height: 22px;
-      opacity: 0.85;
-      transition: opacity 0.3s;
+      max-width: 500px;
+      line-height: 1.65;
+      min-height: 20px;
     }
 
-    /* ── Transcript ───────────────────────────────────────────────────── */
-    .transcript {
+    /* ── Transcript ──────────────────────────────────────────────────── */
+    .transcript-wrap {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       border-top: 1px solid var(--border);
-      padding-top: 16px;
+      padding-top: 14px;
+      gap: 10px;
+    }
+
+    .transcript {
+      flex: 1;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       scrollbar-width: none;
     }
-
     .transcript::-webkit-scrollbar { display: none; }
 
     .turn {
       display: flex;
-      gap: 10px;
-      font-size: 12px;
-      line-height: 1.5;
+      gap: 12px;
+      font-size: 11px;
+      line-height: 1.55;
       animation: fadein 0.3s ease;
     }
-
     @keyframes fadein {
-      from { opacity: 0; transform: translateY(4px); }
+      from { opacity: 0; transform: translateY(3px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
     .turn .role {
       flex-shrink: 0;
-      width: 72px;
+      width: 66px;
       text-align: right;
-      letter-spacing: 0.08em;
+      font-size: 9px;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      font-size: 10px;
       padding-top: 2px;
+      color: var(--muted);
     }
+    .turn.user      .role { color: rgba(59,130,246,0.6); }
+    .turn.assistant .role { color: rgba(0,212,255,0.6); }
+    .turn .content { color: rgba(200,214,229,0.75); }
 
-    .turn.user     .role { color: var(--blue); }
-    .turn.assistant .role { color: var(--cyan); }
-
-    .turn .content {
-      color: var(--text);
-      opacity: 0.8;
-    }
-
-    /* ── Text Input ───────────────────────────────────────────────────── */
     .input-row {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding-top: 12px;
+      padding-top: 10px;
       border-top: 1px solid var(--border);
     }
 
@@ -190,341 +185,446 @@
       border-bottom: 1px solid var(--border);
       color: var(--text);
       font-family: inherit;
-      font-size: 12px;
-      padding: 6px 0;
+      font-size: 11px;
+      padding: 5px 0;
       outline: none;
       letter-spacing: 0.05em;
     }
-
     .input-row input::placeholder { color: var(--muted); }
-
-    .input-row input:focus { border-bottom-color: var(--cyan); }
+    .input-row input:focus { border-bottom-color: rgba(0,212,255,0.4); }
 
     .send-btn {
       background: none;
       border: 1px solid var(--border);
       color: var(--muted);
       font-family: inherit;
-      font-size: 10px;
-      letter-spacing: 0.12em;
+      font-size: 9px;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      padding: 6px 14px;
+      padding: 5px 12px;
       cursor: pointer;
       transition: all 0.2s;
     }
-
-    .send-btn:hover { border-color: var(--cyan); color: var(--cyan); }
-
-    /* ── Mode Badge ───────────────────────────────────────────────────── */
-    .mode-badge {
-      padding: 2px 8px;
-      border: 1px solid currentColor;
-      border-radius: 2px;
-      font-size: 10px;
-      letter-spacing: 0.15em;
-    }
-
-    .mode-NORMAL   { color: var(--cyan); }
-    .mode-FOCUS    { color: var(--blue); }
-    .mode-NIGHT    { color: var(--purple); }
-    .mode-WINDDOWN { color: var(--gold); }
-    .mode-MOODY    { color: var(--magenta); }
-    .mode-MORNING  { color: var(--gold); }
-    .mode-AWAY     { color: var(--muted); }
+    .send-btn:hover { border-color: rgba(0,212,255,0.4); color: rgba(0,212,255,0.7); }
   </style>
 </head>
 <body>
-  <div class="hud">
+<div class="hud">
 
-    <!-- Top Bar -->
-    <div class="topbar">
-      <span class="wordmark">H·A·N·U·M·A·N</span>
-      <div class="indicators">
-        <div class="indicator">
-          <div class="dot" id="presenceDot"></div>
-          <span id="presenceLabel">away</span>
-        </div>
-        <div class="indicator mode-badge mode-NORMAL" id="modeBadge">NORMAL</div>
-        <div class="indicator">
-          <div class="dot online" id="connectionDot"></div>
-          <span id="connectionLabel">online</span>
-        </div>
+  <!-- Top Bar -->
+  <div class="topbar">
+    <span class="wordmark">H · A · N · U · M · A · N</span>
+    <div class="indicators">
+      <div class="indicator">
+        <div class="dot" id="presenceDot"></div>
+        <span id="presenceLabel">away</span>
+      </div>
+      <span class="indicator mode-badge mode-NORMAL" id="modeBadge">normal</span>
+      <div class="indicator">
+        <div class="dot online" id="connDot"></div>
+        <span id="connLabel">online</span>
       </div>
     </div>
-
-    <!-- Centre Stage -->
-    <div class="stage">
-      <div class="canvas-wrap">
-        <canvas id="waveCanvas" width="260" height="260"></canvas>
-      </div>
-      <div class="status-label" id="statusLabel">standby</div>
-      <div class="last-utterance" id="lastUtterance"></div>
-    </div>
-
-    <!-- Transcript + Input -->
-    <div style="display:flex; flex-direction:column; gap:0; overflow:hidden;">
-      <div class="transcript" id="transcript"></div>
-      <div class="input-row">
-        <input type="text" id="textInput" placeholder="type a command..." autocomplete="off" />
-        <button class="send-btn" id="sendBtn">send</button>
-      </div>
-    </div>
-
   </div>
 
-  <script>
-  // ── State ────────────────────────────────────────────────────────────────
-  const state = {
-    status:   'idle',      // idle | listening | thinking | speaking
-    mode:     'NORMAL',
-    presence: 'away',
-    volume:   0.85,
-    connected: false,
+  <!-- Stage -->
+  <div class="stage">
+    <canvas id="orbCanvas" width="560" height="560"></canvas>
+    <div class="status-label" id="statusLabel">standby</div>
+    <div class="last-utterance" id="lastUtterance"></div>
+  </div>
+
+  <!-- Transcript + Input -->
+  <div class="transcript-wrap">
+    <div class="transcript" id="transcript"></div>
+    <div class="input-row">
+      <input type="text" id="textInput" placeholder="type a command, sir..." autocomplete="off" />
+      <button class="send-btn" id="sendBtn">send</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Three.js from CDN -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.163.0/build/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ── State ──────────────────────────────────────────────────────────────────
+const state = {
+  status:    'idle',
+  mode:      'NORMAL',
+  presence:  'away',
+  connected: false,
+};
+
+// ── WebSocket ──────────────────────────────────────────────────────────────
+let ws = null;
+
+function connect() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/ws`);
+  ws.onopen    = () => applyState({ connected: true });
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'state')   applyState(msg);
+    if (msg.type === 'message') addTurn(msg.role, msg.text);
   };
+  ws.onclose = () => { applyState({ connected: false }); setTimeout(connect, 3000); };
+  ws.onerror = () => ws.close();
+}
 
-  // ── WebSocket ────────────────────────────────────────────────────────────
-  let ws = null;
-  let reconnectTimer = null;
+function sendText(text) {
+  if (!text.trim()) return;
+  addTurn('user', text);
+  if (ws?.readyState === WebSocket.OPEN)
+    ws.send(JSON.stringify({ type: 'text', text }));
+}
 
-  function connect() {
-    const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-    ws = new WebSocket(`${protocol}://${location.host}/ws`);
+connect();
 
-    ws.onopen = () => {
-      setState({ connected: true });
-      clearTimeout(reconnectTimer);
-    };
+// ── UI Updates ─────────────────────────────────────────────────────────────
+function applyState(patch) {
+  Object.assign(state, patch);
 
-    ws.onmessage = (evt) => {
-      const msg = JSON.parse(evt.data);
-      if (msg.type === 'state') {
-        setState(msg);
-      } else if (msg.type === 'message') {
-        addTurn(msg.role, msg.text);
-        if (msg.role === 'assistant') setLastUtterance(msg.text);
-      }
-    };
+  // Status label
+  const sl = document.getElementById('statusLabel');
+  sl.textContent = state.status;
+  sl.className   = 'status-label ' + state.status;
 
-    ws.onclose = () => {
-      setState({ connected: false });
-      reconnectTimer = setTimeout(connect, 3000);
-    };
+  // Mode badge
+  const mb = document.getElementById('modeBadge');
+  mb.textContent = state.mode?.toLowerCase() ?? 'normal';
+  mb.className   = 'indicator mode-badge mode-' + (state.mode ?? 'NORMAL');
 
-    ws.onerror = () => ws.close();
+  // Presence
+  const pd = document.getElementById('presenceDot');
+  document.getElementById('presenceLabel').textContent = state.presence;
+  pd.className = 'dot ' + (state.presence === 'home' ? 'online' : 'away');
+
+  // Connection
+  document.getElementById('connDot').className   = 'dot ' + (state.connected ? 'online' : 'offline');
+  document.getElementById('connLabel').textContent = state.connected ? 'online' : 'offline';
+
+  // Update orb target colors
+  updateOrbColors(state.status);
+}
+
+function addTurn(role, text) {
+  const el = document.createElement('div');
+  el.className = 'turn ' + role;
+  el.innerHTML = `<span class="role">${role === 'assistant' ? 'hanuman' : 'you'}</span>
+                  <span class="content">${esc(text)}</span>`;
+  const t = document.getElementById('transcript');
+  t.appendChild(el);
+  t.scrollTop = t.scrollHeight;
+  if (role === 'assistant') document.getElementById('lastUtterance').textContent = text;
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Input ──────────────────────────────────────────────────────────────────
+document.getElementById('sendBtn').addEventListener('click', () => {
+  const inp = document.getElementById('textInput');
+  sendText(inp.value);
+  inp.value = '';
+});
+document.getElementById('textInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('sendBtn').click();
+});
+
+// ── ElevenLabs Orb (Three.js port) ────────────────────────────────────────
+
+// Seeded random (splitmix32)
+function splitmix32(a) {
+  return function() {
+    a |= 0; a = (a + 0x9e3779b9) | 0;
+    let t = a ^ (a >>> 16);
+    t = Math.imul(t, 0x21f0aaad);
+    t = t ^ (t >>> 15);
+    t = Math.imul(t, 0x735a2d97);
+    return ((t = t ^ (t >>> 15)) >>> 0) / 4294967296;
+  };
+}
+
+function clamp01(n) {
+  return Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0;
+}
+
+const canvas   = document.getElementById('orbCanvas');
+const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, premultipliedAlpha: true });
+renderer.setSize(560, 560, false);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+const scene  = new THREE.Scene();
+const camera = new THREE.OrthographicCamera(-3.5, 3.5, 3.5, -3.5, 0.1, 10);
+camera.position.z = 5;
+
+// Perlin noise texture
+const texLoader = new THREE.TextureLoader();
+const perlinTex = texLoader.load(
+  'https://storage.googleapis.com/eleven-public-cdn/images/perlin-noise.png',
+  (tex) => { tex.wrapS = tex.wrapT = THREE.RepeatWrapping; }
+);
+
+// Seeded offsets for 7 ovals
+const rng     = splitmix32(42);
+const offsets = new Float32Array(Array.from({ length: 7 }, () => rng() * Math.PI * 2));
+
+// State-based colors — idle is very dim, each state has its palette
+const COLOR_SETS = {
+  idle:      ['#0a1628', '#050e1a'],
+  listening: ['#00d4ff', '#0077aa'],
+  thinking:  ['#7c3aed', '#3b82f6'],
+  speaking:  ['#d946ef', '#f97316'],  // starts here, then hue-cycles
+};
+
+// Current and target colors
+const curC1 = new THREE.Color(COLOR_SETS.idle[0]);
+const curC2 = new THREE.Color(COLOR_SETS.idle[1]);
+const tgtC1 = new THREE.Color(COLOR_SETS.idle[0]);
+const tgtC2 = new THREE.Color(COLOR_SETS.idle[1]);
+
+function updateOrbColors(status) {
+  const s = status === 'idle' || !COLOR_SETS[status] ? 'idle' : status;
+  tgtC1.set(COLOR_SETS[s][0]);
+  tgtC2.set(COLOR_SETS[s][1]);
+}
+
+// Uniforms — mirroring the ElevenLabs Orb exactly
+const uniforms = {
+  uColor1:       { value: curC1 },
+  uColor2:       { value: curC2 },
+  uOffsets:      { value: offsets },
+  uPerlinTexture:{ value: perlinTex },
+  uTime:         { value: 0 },
+  uAnimation:    { value: 0.1 },
+  uInverted:     { value: 1 },          // dark mode
+  uInputVolume:  { value: 0 },
+  uOutputVolume: { value: 0 },
+  uOpacity:      { value: 0 },
+};
+
+const vertexShader = /* glsl */`
+varying vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+// Fragment shader verbatim from ElevenLabs orb.tsx
+const fragmentShader = /* glsl */`
+uniform float uTime;
+uniform float uAnimation;
+uniform float uInverted;
+uniform float uOffsets[7];
+uniform vec3 uColor1;
+uniform vec3 uColor2;
+uniform float uInputVolume;
+uniform float uOutputVolume;
+uniform float uOpacity;
+uniform sampler2D uPerlinTexture;
+varying vec2 vUv;
+
+const float PI = 3.14159265358979323846;
+
+bool drawOval(vec2 polarUv, vec2 polarCenter, float a, float b, bool reverseGradient, float softness, out vec4 color) {
+  vec2 p = polarUv - polarCenter;
+  float oval = (p.x*p.x)/(a*a) + (p.y*p.y)/(b*b);
+  float edge = smoothstep(1.0, 1.0-softness, oval);
+  if (edge > 0.0) {
+    float gradient = reverseGradient ? (1.0-(p.x/a+1.0)/2.0) : ((p.x/a+1.0)/2.0);
+    gradient = mix(0.5, gradient, 0.1);
+    color = vec4(vec3(gradient), 0.85*edge);
+    return true;
   }
+  return false;
+}
 
-  function sendText(text) {
-    if (!text.trim()) return;
-    addTurn('user', text);
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type: 'text', text }));
+vec3 colorRamp(float g, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
+  if (g < 0.33) return mix(c1, c2, g*3.0);
+  else if (g < 0.66) return mix(c2, c3, (g-0.33)*3.0);
+  else return mix(c3, c4, (g-0.66)*3.0);
+}
+
+vec2 hash2(vec2 p) {
+  return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
+}
+
+float noise2D(vec2 p) {
+  vec2 i=floor(p); vec2 f=fract(p);
+  vec2 u=f*f*(3.0-2.0*f);
+  float n=mix(
+    mix(dot(hash2(i+vec2(0,0)),f-vec2(0,0)), dot(hash2(i+vec2(1,0)),f-vec2(1,0)), u.x),
+    mix(dot(hash2(i+vec2(0,1)),f-vec2(0,1)), dot(hash2(i+vec2(1,1)),f-vec2(1,1)), u.x),
+    u.y);
+  return 0.5+0.5*n;
+}
+
+float sharpRing(vec3 d, float time) {
+  float n=mix(noise2D(vec2(d.x,time)*5.0), noise2D(vec2(d.y,time)*5.0), d.z);
+  return 1.0+(n-0.5)*2.5*0.3;
+}
+
+float smoothRing(vec3 d, float time) {
+  float n=mix(noise2D(vec2(d.x,time)*6.0), noise2D(vec2(d.y,time)*6.0), d.z);
+  return 0.9+(n-0.5)*5.0*0.2;
+}
+
+float flow(vec3 d, float time) {
+  return mix(
+    texture2D(uPerlinTexture, vec2(time, d.x/2.0)).r,
+    texture2D(uPerlinTexture, vec2(time, d.y/2.0)).r,
+    d.z);
+}
+
+void main() {
+  vec2 uv = vUv*2.0-1.0;
+  float radius = length(uv);
+  float theta  = atan(uv.y, uv.x);
+  if (theta < 0.0) theta += 2.0*PI;
+
+  vec3 decomposed = vec3(
+    theta/(2.0*PI),
+    mod(theta/(2.0*PI)+0.5,1.0)+1.0,
+    abs(theta/PI-1.0)
+  );
+
+  float noise = flow(decomposed, radius*0.03-uAnimation*0.2)-0.5;
+  theta += noise*mix(0.08,0.25,uOutputVolume);
+
+  vec4 color = vec4(1.0);
+
+  float originalCenters[7];
+  originalCenters[0]=0.0; originalCenters[1]=0.5*PI; originalCenters[2]=1.0*PI;
+  originalCenters[3]=1.5*PI; originalCenters[4]=2.0*PI; originalCenters[5]=2.5*PI;
+  originalCenters[6]=3.0*PI;
+
+  float centers[7];
+  for (int i=0;i<7;i++) centers[i]=originalCenters[i]+0.5*sin(uTime/20.0+uOffsets[i]);
+
+  for (int i=0;i<7;i++) {
+    float n=texture2D(uPerlinTexture, vec2(mod(centers[i]+uTime*0.05,1.0),0.5)).r;
+    float a=0.5+n*0.3;
+    float b=n*mix(3.5,2.5,uInputVolume);
+    bool rev=(mod(float(i),2.0)==1.0);
+    float dt=min(abs(theta-centers[i]),min(abs(theta+2.0*PI-centers[i]),abs(theta-2.0*PI-centers[i])));
+    vec4 oc;
+    if (drawOval(vec2(dt,radius),vec2(0.0),a,b,rev,0.6,oc)) {
+      color.rgb=mix(color.rgb,oc.rgb,oc.a);
+      color.a=max(color.a,oc.a);
     }
   }
 
-  connect();
+  float rr1=sharpRing(decomposed,uTime*0.1);
+  float rr2=smoothRing(decomposed,uTime*0.1);
+  float ir1=radius+uInputVolume*0.2;
+  float ir2=radius+uInputVolume*0.15;
+  float op1=mix(0.2,0.6,uInputVolume);
+  float op2=mix(0.15,0.45,uInputVolume);
+  float ra1=(ir2>=rr1)?op1:0.0;
+  float ra2=smoothstep(rr2-0.05,rr2+0.05,ir1)*op2;
+  float tra=max(ra1,ra2);
+  color.rgb=1.0-(1.0-color.rgb)*(1.0-vec3(1.0)*tra);
 
-  // ── UI Updates ───────────────────────────────────────────────────────────
-  function setState(patch) {
-    Object.assign(state, patch);
-    renderStatus();
-    renderMode();
-    renderPresence();
-    renderConnection();
+  float lum=mix(color.r,1.0-color.r,uInverted);
+  color.rgb=colorRamp(lum, vec3(0.0), uColor1, uColor2, vec3(1.0));
+  color.a*=uOpacity;
+  gl_FragColor=color;
+}
+`;
+
+const material = new THREE.ShaderMaterial({
+  uniforms,
+  vertexShader,
+  fragmentShader,
+  transparent: true,
+});
+
+const mesh = new THREE.Mesh(new THREE.CircleGeometry(3.5, 64), material);
+scene.add(mesh);
+
+// Animation state
+let curIn  = 0, curOut = 0, animSpeed = 0.1;
+let speakHue = 0;   // for multicolor speaking cycling
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = clock.getDelta();
+  const u     = uniforms;
+
+  // Fade in
+  u.uOpacity.value = Math.min(1, u.uOpacity.value + delta * 2);
+
+  u.uTime.value += delta * 0.5;
+
+  // Target volumes by state
+  const t = u.uTime.value * 2;
+  let tIn = 0, tOut = 0.3;
+  const s = state.status;
+
+  if (s === 'listening') {
+    tIn  = clamp01(0.55 + Math.sin(t * 3.2) * 0.35);
+    tOut = 0.45;
+  } else if (s === 'speaking') {
+    tIn  = clamp01(0.65 + Math.sin(t * 4.8) * 0.22);
+    tOut = clamp01(0.75 + Math.sin(t * 3.6) * 0.22);
+  } else if (s === 'thinking') {
+    const base   = 0.38 + 0.07 * Math.sin(t * 0.7);
+    const wander = 0.05 * Math.sin(t * 2.1) * Math.sin(t * 0.37 + 1.2);
+    tIn  = clamp01(base + wander);
+    tOut = clamp01(0.48 + 0.12 * Math.sin(t * 1.05 + 0.6));
   }
 
-  function renderStatus() {
-    const el = document.getElementById('statusLabel');
-    el.textContent = state.status;
-    el.className = 'status-label ' + state.status;
+  curIn  += (tIn  - curIn)  * 0.2;
+  curOut += (tOut - curOut) * 0.2;
+
+  const tSpeed = 0.1 + (1 - Math.pow(curOut - 1, 2)) * 0.9;
+  animSpeed += (tSpeed - animSpeed) * 0.12;
+  u.uAnimation.value += delta * animSpeed;
+
+  u.uInputVolume.value  = curIn;
+  u.uOutputVolume.value = curOut;
+
+  // Multicolor hue cycling during speaking
+  if (s === 'speaking') {
+    speakHue = (speakHue + delta * 40) % 360;
+    tgtC1.setHSL(speakHue / 360, 0.9, 0.55);
+    tgtC2.setHSL(((speakHue + 120) % 360) / 360, 0.9, 0.45);
   }
 
-  function renderMode() {
-    const el = document.getElementById('modeBadge');
-    el.textContent = state.mode;
-    el.className = 'indicator mode-badge mode-' + state.mode;
-  }
+  // Smooth color lerp
+  curC1.lerp(tgtC1, 0.06);
+  curC2.lerp(tgtC2, 0.06);
 
-  function renderPresence() {
-    const dot   = document.getElementById('presenceDot');
-    const label = document.getElementById('presenceLabel');
-    label.textContent = state.presence;
-    dot.className = 'dot ' + (state.presence === 'home' ? 'online' : 'away');
-  }
+  renderer.render(scene, camera);
+}
 
-  function renderConnection() {
-    const dot   = document.getElementById('connectionDot');
-    const label = document.getElementById('connectionLabel');
-    dot.className  = 'dot ' + (state.connected ? 'online' : 'offline');
-    label.textContent = state.connected ? 'online' : 'offline';
-  }
+animate();
 
-  function setLastUtterance(text) {
-    document.getElementById('lastUtterance').textContent = text;
-  }
+// ── Demo mode (cycles states when not connected) ───────────────────────────
+const demoSeq  = ['idle','listening','thinking','speaking'];
+const demoTime = [2000, 2500, 2000, 5000];
+let   demoIdx  = 0;
 
-  function addTurn(role, text) {
-    const t = document.getElementById('transcript');
-    const div = document.createElement('div');
-    div.className = 'turn ' + role;
-    div.innerHTML = `
-      <span class="role">${role === 'assistant' ? 'hanuman' : 'you'}</span>
-      <span class="content">${escHtml(text)}</span>`;
-    t.appendChild(div);
-    t.scrollTop = t.scrollHeight;
-  }
+function runDemo() {
+  if (state.connected) return;
+  applyState({ status: demoSeq[demoIdx % demoSeq.length] });
+  setTimeout(() => { demoIdx++; runDemo(); }, demoTime[demoIdx % demoTime.length]);
+}
 
-  function escHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  // ── Input ────────────────────────────────────────────────────────────────
-  document.getElementById('sendBtn').addEventListener('click', () => {
-    const inp = document.getElementById('textInput');
-    sendText(inp.value);
-    inp.value = '';
-  });
-
-  document.getElementById('textInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('sendBtn').click();
-  });
-
-  // ── Waveform Canvas ──────────────────────────────────────────────────────
-  const canvas  = document.getElementById('waveCanvas');
-  const ctx     = canvas.getContext('2d');
-  const CX      = canvas.width  / 2;
-  const CY      = canvas.height / 2;
-  const RADIUS  = 80;   // inner circle radius
-  const BARS    = 120;  // number of radial bars
-  const BAR_MAX = 42;   // max bar length (px)
-
-  // Smoothed amplitude values for each bar
-  const amplitudes = new Float32Array(BARS).fill(0);
-
-  // Multicolor palette — hue cycles around the circle
-  function barColor(i, amp) {
-    const hue = (i / BARS) * 360;
-    const lightness = 45 + amp * 25;
-    return `hsl(${hue}, 90%, ${lightness}%)`;
-  }
-
-  // Noise generator for realistic waveform simulation
-  let noiseOffset = 0;
-  function noise(x) {
-    return (Math.sin(x * 2.3) + Math.sin(x * 1.7) + Math.sin(x * 3.1)) / 3;
-  }
-
-  let animFrame = null;
-  let phase = 0;
-
-  function draw() {
-    animFrame = requestAnimationFrame(draw);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const s = state.status;
-    phase += 0.04;
-
-    // ── Target amplitudes by state ────────────────────────────────────
-    for (let i = 0; i < BARS; i++) {
-      let target = 0;
-      const angle = (i / BARS) * Math.PI * 2;
-
-      if (s === 'speaking') {
-        // Rich, varied waveform when speaking
-        const n = noise(i * 0.15 + noiseOffset);
-        const pulse = (Math.sin(phase * 2 + i * 0.1) + 1) / 2;
-        target = (Math.abs(n) * 0.6 + pulse * 0.4) * BAR_MAX;
-        noiseOffset += 0.003;
-      } else if (s === 'listening') {
-        // Gentle inward pulse
-        const pulse = (Math.sin(phase * 1.5 + i * 0.05) + 1) / 2;
-        target = pulse * BAR_MAX * 0.18;
-      } else if (s === 'thinking') {
-        // Slow rotating sweep
-        const sweep = (Math.sin(angle - phase * 1.2) + 1) / 2;
-        target = sweep * BAR_MAX * 0.25;
-      } else {
-        // Idle: very faint breathing ring
-        target = (Math.sin(phase * 0.6) + 1) / 2 * BAR_MAX * 0.06;
-      }
-
-      // Smooth towards target
-      const speed = s === 'speaking' ? 0.25 : 0.1;
-      amplitudes[i] += (target - amplitudes[i]) * speed;
-    }
-
-    // ── Draw bars ────────────────────────────────────────────────────
-    for (let i = 0; i < BARS; i++) {
-      const angle  = (i / BARS) * Math.PI * 2 - Math.PI / 2;
-      const amp    = amplitudes[i] / BAR_MAX;
-      const len    = amplitudes[i];
-      const x1     = CX + Math.cos(angle) * RADIUS;
-      const y1     = CY + Math.sin(angle) * RADIUS;
-      const x2     = CX + Math.cos(angle) * (RADIUS + len);
-      const y2     = CY + Math.sin(angle) * (RADIUS + len);
-
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.strokeStyle = barColor(i, amp);
-      ctx.lineWidth   = 1.8;
-      ctx.globalAlpha = 0.5 + amp * 0.5;
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-
-    // ── Inner circle ────────────────────────────────────────────────
-    const glowSize = s === 'speaking' ? 18 : s === 'listening' ? 10 : 6;
-    const glowColor = s === 'speaking' ? 'rgba(217,70,239,0.15)'
-                    : s === 'listening' ? 'rgba(0,212,255,0.12)'
-                    : s === 'thinking'  ? 'rgba(59,130,246,0.1)'
-                    :                    'rgba(0,212,255,0.05)';
-
-    const grad = ctx.createRadialGradient(CX, CY, RADIUS - glowSize, CX, CY, RADIUS + 2);
-    grad.addColorStop(0, glowColor);
-    grad.addColorStop(1, 'transparent');
-    ctx.beginPath();
-    ctx.arc(CX, CY, RADIUS + glowSize, 0, Math.PI * 2);
-    ctx.fillStyle = grad;
-    ctx.fill();
-
-    // Circle ring
-    ctx.beginPath();
-    ctx.arc(CX, CY, RADIUS, 0, Math.PI * 2);
-    ctx.strokeStyle = s === 'speaking'  ? 'rgba(217,70,239,0.5)'
-                    : s === 'listening' ? 'rgba(0,212,255,0.4)'
-                    : s === 'thinking'  ? 'rgba(59,130,246,0.3)'
-                    :                    'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Centre letter
-    ctx.font = 'bold 28px SF Mono, Fira Code, monospace';
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = s === 'speaking'  ? 'rgba(217,70,239,0.85)'
-                  : s === 'listening' ? 'rgba(0,212,255,0.85)'
-                  : s === 'thinking'  ? 'rgba(59,130,246,0.7)'
-                  :                    'rgba(255,255,255,0.15)';
-    ctx.fillText('H', CX, CY);
-  }
-
-  draw();
-
-  // ── Demo cycle (runs when not connected to backend) ──────────────────────
-  // Cycles through states so the UI looks alive before the backend is wired.
-  let demoTimer = null;
-  const demoStates = ['idle','listening','thinking','speaking','idle'];
-  let demoIdx = 0;
-
-  function runDemo() {
-    if (state.connected) return;
-    setState({ status: demoStates[demoIdx % demoStates.length] });
-    const durations = [2000, 2500, 1500, 4000, 1000];
-    demoTimer = setTimeout(() => { demoIdx++; runDemo(); }, durations[demoIdx % durations.length]);
-  }
-
-  // Start demo after 800ms — gives WebSocket a chance to connect first
-  setTimeout(() => { if (!state.connected) runDemo(); }, 800);
-  </script>
+setTimeout(() => { if (!state.connected) runDemo(); }, 900);
+</script>
 </body>
 </html>

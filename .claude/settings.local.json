@@ -7,7 +7,11 @@
       "mcp__Claude_in_Chrome__tabs_context_mcp",
       "Bash(git init *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:ui.elevenlabs.io)",
+      "WebFetch(domain:api.github.com)"
     ]
   }
 }
