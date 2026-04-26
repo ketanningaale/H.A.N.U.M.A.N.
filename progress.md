@@ -7,6 +7,7 @@
 ## Current Status
 
 **Phase:** Phase 1 — Clap Activation (in progress)
+**UI:** HUD live at `http://localhost:8000` when HANUMAN is running
 **Voice:** `en-GB-RyanNeural` (British, JARVIS-style)  
 **LLM:** Claude API (primary) + Ollama (fallback)  
 **Last milestone:** Phase 0 complete — HANUMAN spoke for the first time ✓
@@ -155,19 +156,22 @@
 
 ---
 
-## Phase 9 — Web UI & API
+## Web UI & API ✓ COMPLETE (built alongside Phase 0)
 > Goal: Interact with HANUMAN from any device on the network.
 
-- [ ] `api/server.py` — FastAPI server running
-- [ ] `/chat` endpoint (text in, text/audio out)
-- [ ] `/status` endpoint (mode, presence, volume level)
-- [ ] `/mode` endpoint (get/set mode)
-- [ ] `/camera/snapshot` endpoint
-- [ ] `ui/index.html` — minimal chat interface with mode indicator
-- [ ] Streaming LLM responses to UI in real-time
-- [ ] Simple token authentication
+- [x] `ui/index.html` — minimalist dark HUD, multicolor radial waveform circle
+- [x] Waveform animates per state: idle (breathe) / listening (pulse) / thinking (sweep) / speaking (full multicolor)
+- [x] Top bar: presence dot, mode badge, connection indicator
+- [x] Live transcript with user / HANUMAN turns
+- [x] Text input fallback for typed commands
+- [x] Demo mode cycles states when backend not connected
+- [x] `api/server.py` — FastAPI with WebSocket (`/ws`), `/status`, `/` serves UI
+- [x] `main.py` broadcasts state changes to all connected UI clients in real-time
+- [ ] `/mode` endpoint (get/set mode) — Phase 8
+- [ ] `/camera/snapshot` endpoint — Phase 3
+- [ ] Simple token authentication — future
 
-**Done when:** *Open browser on phone → chat with HANUMAN, see current mode.*
+**Completed:** 2026-04-26
 
 ---
 
@@ -198,3 +202,4 @@
 | 2026-04-26 | Modes deferred to Phase 8 | Infrastructure built in earlier phases; modes compose everything above. |
 | 2026-04-26 | Adaptive volume: 3 inputs | Noise + time + distance gives genuinely context-aware output. |
 | 2026-04-26 | Phase 0 complete | Voice loop working. Smoke test passed at 0.85 volume. HANUMAN spoke. |
+| 2026-04-26 | HUD UI built early | Minimalist dark HUD with multicolor radial waveform. WebSocket-connected to voice loop. Demo mode when backend offline. |

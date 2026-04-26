@@ -106,6 +106,8 @@ python scripts/register_face.py
 python main.py
 ```
 
+Then open **http://localhost:8000** in your browser to see the HUD.
+
 ---
 
 ## Configuration
