@@ -52,6 +52,11 @@ logs/
 # Ollama models are large — don't commit them
 models/
 
+# UI build artifacts
+ui/node_modules/
+ui/dist/
+ui/.vite/
+
 # Test artifacts
 .pytest_cache/
 .coverage

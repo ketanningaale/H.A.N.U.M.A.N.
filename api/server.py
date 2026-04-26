@@ -13,10 +13,10 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="HANUMAN", docs_url=None, redoc_url=None)
 
-# Serve static assets
-_static = Path(__file__).parent.parent / "ui" / "static"
-if _static.exists():
-    app.mount("/static", StaticFiles(directory=str(_static)), name="static")
+# Serve the built React app (ui/dist)
+_dist = Path(__file__).parent.parent / "ui" / "dist"
+if _dist.exists():
+    app.mount("/assets", StaticFiles(directory=str(_dist / "assets")), name="assets")
 
 # ── Connection Manager ────────────────────────────────────────────────────────
 
@@ -69,7 +69,10 @@ manager = ConnectionManager()
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    return (Path(__file__).parent.parent / "ui" / "index.html").read_text()
+    # Serve built React app; fallback to raw source during development
+    dist = Path(__file__).parent.parent / "ui" / "dist" / "index.html"
+    src  = Path(__file__).parent.parent / "ui" / "index.html"
+    return (dist if dist.exists() else src).read_text()
 
 
 @app.get("/status")

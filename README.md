@@ -108,6 +108,15 @@ python main.py
 
 Then open **http://localhost:8000** in your browser to see the HUD.
 
+> **UI development mode** (hot reload):
+> ```bash
+> cd ui && npm run dev   # http://localhost:5173 — proxies /ws to FastAPI
+> ```
+> **Rebuild UI after changes:**
+> ```bash
+> cd ui && npm run build
+> ```
+
 ---
 
 ## Configuration

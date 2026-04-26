@@ -159,8 +159,13 @@
 ## Web UI & API ✓ COMPLETE (built alongside Phase 0)
 > Goal: Interact with HANUMAN from any device on the network.
 
-- [x] `ui/index.html` — minimalist dark HUD with ElevenLabs Orb (Three.js WebGL blob)
-- [x] Orb animates per state: idle (dim breathe) / listening (cyan pulse) / thinking (blue/purple sweep) / speaking (full multicolor hue cycle)
+- [x] `ui/` — React + Vite + TypeScript app using ElevenLabs UI component library
+- [x] ElevenLabs `Orb` — Siri-like fluid blob, state-aware, multicolor hue cycling when speaking
+- [x] ElevenLabs `MicrophoneWaveform` — overlaid on orb during listening state
+- [x] ElevenLabs `ShimmeringText` — HANUMAN's last utterance shimmers while speaking
+- [x] ElevenLabs dark color theme (OKLCH CSS variables) applied throughout
+- [x] WebSocket-connected to FastAPI backend, demo mode when offline
+- [x] FastAPI serves `ui/dist/` (built bundle) at `/`
 - [x] Top bar: presence dot, mode badge, connection indicator
 - [x] Live transcript with user / HANUMAN turns
 - [x] Text input fallback for typed commands
@@ -202,4 +207,4 @@
 | 2026-04-26 | Modes deferred to Phase 8 | Infrastructure built in earlier phases; modes compose everything above. |
 | 2026-04-26 | Adaptive volume: 3 inputs | Noise + time + distance gives genuinely context-aware output. |
 | 2026-04-26 | Phase 0 complete | Voice loop working. Smoke test passed at 0.85 volume. HANUMAN spoke. |
-| 2026-04-26 | HUD UI built early | Minimalist dark HUD with ElevenLabs Orb shader (Three.js). Siri-like fluid blob, multicolor hue cycling when speaking. WebSocket-connected. |
+| 2026-04-26 | HUD UI — React + ElevenLabs UI | Converted to React/Vite. Using Orb, MicrophoneWaveform, ShimmeringText components + ElevenLabs dark theme. Built to dist/, served by FastAPI. |
