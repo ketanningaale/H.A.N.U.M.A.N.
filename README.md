@@ -40,6 +40,7 @@ A fully local, voice-first AI assistant inspired by J.A.R.V.I.S. from Iron Man a
 |---|---|
 | LLM (primary) | Claude API — `claude-sonnet-4-6` |
 | LLM (fallback) | Ollama — `llama3:8b` (M4) / `phi3:mini` (RPi) |
+| LLM (testing) | Mock engine — canned responses, no API needed |
 | Speech-to-Text | `faster-whisper` |
 | Text-to-Speech | `edge-tts` (M4) / `piper-tts` (RPi) |
 | Voice | `en-GB-RyanNeural` |
@@ -50,6 +51,7 @@ A fully local, voice-first AI assistant inspired by J.A.R.V.I.S. from Iron Man a
 | Web search | `duckduckgo-search` |
 | Memory | SQLite |
 | API server | FastAPI |
+| UI visual | Canvas 2D particle sphere (`simplex-noise`, additive blending) |
 
 ---
 
@@ -90,7 +92,10 @@ cp .env.example .env
 # Add your Anthropic API key and camera RTSP URL
 ```
 
-### 3. Install Ollama (offline fallback)
+> **No API key yet?** Set `primary: mock` in `config/settings.yaml` to run the full
+> voice pipeline with canned responses — no Claude or Ollama needed.
+
+### 3. Install Ollama (offline fallback — optional)
 ```bash
 # Install from https://ollama.com
 ollama pull llama3:8b
@@ -108,6 +113,16 @@ python main.py
 
 Then open **http://localhost:8000** in your browser to see the HUD.
 
+> **UI development mode** (hot reload):
+> ```bash
+> cd ui && npm run dev   # http://localhost:5173 — proxies /ws to FastAPI
+> ```
+> **Rebuild UI after changes:**
+> ```bash
+> cd ui && npm run build
+> ```
+
+---
 > **UI development mode** (hot reload):
 > ```bash
 > cd ui && npm run dev   # http://localhost:5173 — proxies /ws to FastAPI

@@ -1,16 +1,16 @@
 # HANUMAN — Build Progress
 
-> Last updated: 2026-04-26
+> Last updated: 2026-04-27
 
 ---
 
 ## Current Status
 
 **Phase:** Phase 1 — Clap Activation (in progress)
-**UI:** HUD live at `http://localhost:8000` when HANUMAN is running
+**UI:** Volumetric particle sphere HUD live at `http://localhost:8000`
 **Voice:** `en-GB-RyanNeural` (British, JARVIS-style)  
-**LLM:** Claude API (primary) + Ollama (fallback)  
-**Last milestone:** Phase 0 complete — HANUMAN spoke for the first time ✓
+**LLM:** Claude API (primary) + Ollama (fallback) + Mock (no API needed)
+**Last milestone:** UI v2 complete — particle sphere visual, mock LLM, full pipeline tested ✓
 
 ---
 
@@ -19,7 +19,7 @@
 
 - [x] Python virtual environment set up (`.venv`)
 - [x] Anthropic API key configured via `.env`
-- [x] `core/brain.py` — Claude API primary, Ollama fallback, auto-switches
+- [x] `core/brain.py` — Claude API primary, Ollama fallback, mock mode (no API needed)
 - [x] Persona system prompt injected into every request via `config/persona.txt`
 - [x] `core/context.py` — rolling conversation buffer (20 turns)
 - [x] `input/stt.py` — faster-whisper with VAD silence detection
@@ -156,27 +156,34 @@
 
 ---
 
-## Web UI & API ✓ COMPLETE (built alongside Phase 0)
+## Web UI & API ✓ COMPLETE (v2 rebuilt 2026-04-27)
 > Goal: Interact with HANUMAN from any device on the network.
 
-- [x] `ui/` — React + Vite + TypeScript app using ElevenLabs UI component library
-- [x] ElevenLabs `Orb` — Siri-like fluid blob, state-aware, multicolor hue cycling when speaking
-- [x] ElevenLabs `MicrophoneWaveform` — overlaid on orb during listening state
-- [x] ElevenLabs `ShimmeringText` — HANUMAN's last utterance shimmers while speaking
-- [x] ElevenLabs dark color theme (OKLCH CSS variables) applied throughout
+- [x] `ui/` — React + Vite + TypeScript, 350 KB bundle (no Three.js)
+- [x] `ui/src/components/ui/particle-ring.tsx` — volumetric 3D particle sphere (Canvas 2D)
+  - Particula algorithm: uniform sphere-volume distribution (cube-root radius sampling)
+  - 3D simplex-noise turbulence on 3 independent planes drives per-particle velocity
+  - Perspective projection (`depth = FOCAL - rz`) — front particles larger/brighter
+  - Additive blending (`'lighter'`) — dim particles accumulate into glowing nebula
+  - Soft radius constraint keeps particles contained; lifetime fade-in/out/respawn
+  - idle = nothing, listening = 1 cyan sphere, thinking = 1 slow purple sphere
+  - speaking = 2 counter-rotating spheres with hue-cycling complementary colours
+- [x] ElevenLabs `ShimmeringText` — last utterance shimmers while speaking
+- [x] ElevenLabs dark colour theme (OKLCH CSS variables) throughout
 - [x] WebSocket-connected to FastAPI backend, demo mode when offline
 - [x] FastAPI serves `ui/dist/` (built bundle) at `/`
 - [x] Top bar: presence dot, mode badge, connection indicator
 - [x] Live transcript with user / HANUMAN turns
 - [x] Text input fallback for typed commands
-- [x] Demo mode cycles states when backend not connected
+- [x] Demo mode cycles all four states when backend not connected
 - [x] `api/server.py` — FastAPI with WebSocket (`/ws`), `/status`, `/` serves UI
 - [x] `main.py` broadcasts state changes to all connected UI clients in real-time
+- [x] `simplex-noise` added for 3D Perlin noise in JS
 - [ ] `/mode` endpoint (get/set mode) — Phase 8
 - [ ] `/camera/snapshot` endpoint — Phase 3
 - [ ] Simple token authentication — future
 
-**Completed:** 2026-04-26
+**Completed:** 2026-04-27
 
 ---
 
@@ -208,3 +215,6 @@
 | 2026-04-26 | Adaptive volume: 3 inputs | Noise + time + distance gives genuinely context-aware output. |
 | 2026-04-26 | Phase 0 complete | Voice loop working. Smoke test passed at 0.85 volume. HANUMAN spoke. |
 | 2026-04-26 | HUD UI — React + ElevenLabs UI | Converted to React/Vite. Using Orb, MicrophoneWaveform, ShimmeringText components + ElevenLabs dark theme. Built to dist/, served by FastAPI. |
+| 2026-04-27 | UI v2 — custom particle sphere replaces ElevenLabs Orb | Orb (Three.js/R3F) removed. Canvas 2D particle sphere using Particula algorithm: simplex-noise turbulence, perspective projection, additive blending. Bundle 1.24 MB → 350 KB. |
+| 2026-04-27 | Mock LLM mode added | `primary: mock` in settings.yaml lets the full voice pipeline run with no API key or Ollama. Canned HANUMAN-style responses for testing. |
+| 2026-04-27 | Python 3.9 compatibility fixes | `X \| None` union syntax replaced with `Optional[X]` throughout. anthropic/ollama imports deferred to call time so missing packages don't crash startup. |
