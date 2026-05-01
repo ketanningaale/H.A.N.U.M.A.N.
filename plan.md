@@ -96,11 +96,11 @@ No wake word. No button press. Just presence.
 │  ┌──────────────────────────▼──────────────────────────────┐ │
 │  │                    LLM Engine                           │ │
 │  │                                                         │ │
-│  │   PRIMARY:  Claude API (claude-sonnet-4-6)             │ │
-│  │             Vision · Tool use · MCP connectors          │ │
+│  │   PRIMARY:  Ollama (llama3.2:3b on M4 / phi3:mini RPi) │ │
+│  │             Offline · Zero cost · Always available      │ │
 │  │                                                         │ │
-│  │   FALLBACK: Ollama (llama3:8b on M4 / phi3:mini RPi)   │ │
-│  │             Offline · Zero cost · Routine tasks         │ │
+│  │   CLOUD:   Claude API (claude-sonnet-4-6)              │ │
+│  │             Vision · MCP connectors · Complex reasoning │ │
 │  └──────────────────────────┬──────────────────────────────┘ │
 │                             │                                │
 │  ┌──────────────────────────▼──────────────────────────────┐ │
@@ -310,29 +310,35 @@ Patterns:
 
 ## LLM Strategy — Claude + Ollama Hybrid
 
-### Why Claude as Primary
+### Why Ollama as Primary
 
-| Feature | Claude API | Ollama (local) |
+| Feature | Ollama (local) | Claude API |
 |---|---|---|
-| Vision (camera frames) | ✅ Native | ❌ Need separate model |
-| MCP Connectors (Gmail, Calendar, Notion…) | ✅ Built-in | ❌ Manual only |
-| Intelligence quality | ✅ Best in class | ⚠️ Good for 7B |
-| Offline capability | ❌ Needs internet | ✅ Fully offline |
-| Cost | ~$0.01–0.05/day personal use | Free |
-| Context window | 200K tokens | 4–8K typical |
+| Offline capability | ✅ Fully offline | ❌ Needs internet |
+| Cost | Free | ~$0.01–0.05/day |
+| Vision (camera frames) | ❌ Separate model needed | ✅ Native |
+| MCP Connectors (Gmail, Calendar…) | ❌ Manual only | ✅ Built-in |
+| Intelligence quality | ⚠️ Good for 3B–8B | ✅ Best in class |
+| Context window | 4–8K typical | 200K tokens |
+
+**Default model:** `llama3.2:3b` on M4 MacBook, `phi3:mini` on RPi 5.
 
 ### Hybrid Approach
 
 ```
-Every request → check mode + complexity:
+Every request → routed by config:
 
-OFFLINE / routine task (time, notes, reminders, simple commands)
-  → Ollama (free, instant, no internet needed)
+primary: ollama  (default — free, instant, no internet)
+  → handles all conversational tasks reliably
 
-Complex reasoning / vision / tool-heavy / MCP connectors
-  → Claude API (best result, small cost)
+primary: claude  (set when API key available)
+  → superior reasoning, vision queries, MCP tool use
 
-User-configurable: can force all-Ollama (zero cost) or all-Claude
+offline_fallback: true
+  → if Claude unreachable, automatically falls back to Ollama
+
+primary: mock    (testing only — no model needed)
+  → canned HANUMAN-style responses, full UI pipeline testable
 ```
 
 ### Claude API Cost Estimate (Personal Use)
@@ -394,8 +400,8 @@ Set a monthly budget cap in the Anthropic dashboard for peace of mind.
 
 | Layer | M4 MacBook | Raspberry Pi 5 | Cost |
 |---|---|---|---|
-| LLM (primary) | Claude API (claude-sonnet-4-6) | Claude API | ~cents/day |
-| LLM (fallback) | Ollama + llama3:8b | Ollama + phi3:mini | Free |
+| LLM (primary) | Ollama + llama3.2:3b | Ollama + phi3:mini | Free |
+| LLM (cloud/vision) | Claude API (claude-sonnet-4-6) | Claude API | ~cents/day |
 | STT | faster-whisper medium | faster-whisper tiny | Free |
 | Wake/Clap | sounddevice + VAD | sounddevice + VAD | Free |
 | Camera | OpenCV + RTSP | OpenCV + RTSP | Free |
@@ -534,17 +540,18 @@ H.A.N.U.M.A.N/
 
 ---
 
-### Phase 0 — Voice Loop (Week 1)
+### Phase 0 — Voice Loop ✓ COMPLETE
 **Goal:** HANUMAN can hear you, think, and speak back in character.
 
-- [ ] Python venv setup
-- [ ] Install Ollama, pull `llama3:8b`
-- [ ] `core/brain.py` — Ollama + Claude API wrapper, auto-fallback
-- [ ] Inject persona system prompt
-- [ ] `input/stt.py` — faster-whisper transcription
-- [ ] `output/tts.py` — edge-tts voice output
-- [ ] `main.py` — basic loop: listen → think → speak
-- [ ] HANUMAN sounds like HANUMAN from day one
+- [x] Python venv setup
+- [x] Install Ollama (`brew install ollama`), pull `llama3.2:3b`
+- [x] `core/brain.py` — Ollama primary, Claude API optional, mock mode
+- [x] Inject persona system prompt via `config/persona.txt`
+- [x] `input/stt.py` — faster-whisper with Silero VAD, hallucination guard, energy gate
+- [x] `output/tts.py` — edge-tts, `asyncio.run()` compatible in both sync and async contexts
+- [x] `main.py` — voice loop: listen → think → speak, graceful shutdown
+- [x] asyncio event loop fixed — voice thread broadcasts state correctly to UI
+- [x] HANUMAN sounds like HANUMAN from day one
 
 **Success:** *"What time is it?" → HANUMAN replies in voice, in character.*
 
@@ -646,13 +653,17 @@ H.A.N.U.M.A.N/
 
 ---
 
-### Phase 8 — Web UI & API (Week 6)
+### Phase 8 — Web UI & API ✓ COMPLETE
 **Goal:** Interact with HANUMAN from any device on your network.
 
-- [ ] `api/server.py` — FastAPI with `/chat`, `/status`, `/mode`, `/camera/snapshot`
-- [ ] `ui/index.html` — minimal chat interface with mode indicator
-- [ ] Stream LLM responses to UI in real-time
-- [ ] Simple token auth (not exposed to internet)
+- [x] `api/server.py` — FastAPI with WebSocket `/ws`, `/status`, `/` serves UI
+- [x] `ui/` — React + Vite + TypeScript, Canvas 2D volumetric particle sphere
+- [x] Real-time state broadcast via WebSocket (listening / thinking / speaking / idle)
+- [x] Live transcript, text input fallback, demo mode when offline
+- [x] asyncio threading bugs resolved — status reflects true voice loop state
+- [ ] `/mode` endpoint — Phase 8 modes system
+- [ ] `/camera/snapshot` endpoint — Phase 3
+- [ ] Simple token auth — future
 
 **Success:** *Open browser on your phone → chat with HANUMAN, see current mode, change mode.*
 
@@ -692,9 +703,9 @@ H.A.N.U.M.A.N/
 
 ```yaml
 llm:
-  primary: claude                         # "claude" or "ollama"
+  primary: ollama                         # "ollama", "claude", or "mock"
   claude_model: claude-sonnet-4-6
-  ollama_model: llama3:8b                 # phi3:mini for RPi
+  ollama_model: llama3.2:3b              # phi3:mini for RPi
   ollama_host: http://localhost:11434
   context_window: 4096
   offline_fallback: true                  # fall back to ollama if claude unreachable
@@ -759,15 +770,14 @@ CAMERA_RTSP_URL=rtsp://...
 
 ---
 
-## Immediate Next Steps
+## Current Next Steps
 
-1. `git init` the project
-2. Create Python virtual environment (`python3.11 -m venv .venv`)
-3. Install Ollama, pull `llama3:8b`
-4. Get an Anthropic API key (anthropic.com → set a $5/month budget cap)
-5. Build Phase 0: voice loop — hear HANUMAN speak for the first time
-6. Build Phase 1: clap activation
-7. Build Phase 2: connect the Aqara camera, register your face
+1. **Phase 1: Clap activation** — `awareness/clap_detector.py`, single/double/triple clap patterns
+2. **Phase 2: Adaptive volume** — `awareness/noise_monitor.py`, wire into volume controller
+3. **Phase 3: Camera & presence** — Aqara RTSP, face recognition, proactive greeting
+4. **Phase 4: Memory** — SQLite long-term store, fact extraction, session recall
+5. **Phase 5: Tools** — web search, system info, notes, file manager, tool router
+6. **Optional:** Add Anthropic API key to `.env` for Claude mode (vision, MCP, better reasoning)
 
 ---
 

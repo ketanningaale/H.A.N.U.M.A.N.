@@ -1,16 +1,16 @@
 # HANUMAN — Build Progress
 
-> Last updated: 2026-04-27
+> Last updated: 2026-05-02
 
 ---
 
 ## Current Status
 
-**Phase:** Phase 1 — Clap Activation (in progress)
+**Phase:** Phase 1 — Clap Activation (next up)
 **UI:** Volumetric particle sphere HUD live at `http://localhost:8000`
-**Voice:** `en-GB-RyanNeural` (British, JARVIS-style)  
-**LLM:** Claude API (primary) + Ollama (fallback) + Mock (no API needed)
-**Last milestone:** UI v2 complete — particle sphere visual, mock LLM, full pipeline tested ✓
+**Voice:** `en-GB-RyanNeural` (British, JARVIS-style)
+**LLM:** Ollama `llama3.2:3b` (primary, offline) + Claude API (when key set) + Mock (no dependencies)
+**Last milestone:** Voice pipeline fully operational — Ollama wired in, all async/audio bugs resolved ✓
 
 ---
 
@@ -18,11 +18,11 @@
 > Goal: HANUMAN can hear you, think, and speak back in character.
 
 - [x] Python virtual environment set up (`.venv`)
-- [x] Anthropic API key configured via `.env`
-- [x] `core/brain.py` — Claude API primary, Ollama fallback, mock mode (no API needed)
+- [x] Anthropic API key configured via `.env` (optional — Ollama is primary)
+- [x] `core/brain.py` — Ollama primary, Claude API fallback, mock mode (no dependencies)
 - [x] Persona system prompt injected into every request via `config/persona.txt`
 - [x] `core/context.py` — rolling conversation buffer (20 turns)
-- [x] `input/stt.py` — faster-whisper with VAD silence detection
+- [x] `input/stt.py` — faster-whisper with VAD silence detection + hallucination guard
 - [x] `output/tts.py` — edge-tts generating audio in `en-GB-RyanNeural`
 - [x] `output/speaker.py` — `afplay` on macOS, `mpg123` on RPi, volume param
 - [x] `output/volume_controller.py` — noise + time + distance adaptive volume
@@ -30,6 +30,51 @@
 - [x] Smoke test passed — *"All systems online, sir. HANUMAN is ready."*
 
 **Completed:** 2026-04-26
+
+---
+
+## Web UI & API ✓ COMPLETE (v2 rebuilt 2026-04-27)
+> Goal: Interact with HANUMAN from any device on the network.
+
+- [x] `ui/` — React + Vite + TypeScript, 350 KB bundle (no Three.js)
+- [x] `ui/src/components/ui/particle-ring.tsx` — volumetric 3D particle sphere (Canvas 2D)
+  - Particula algorithm: uniform sphere-volume distribution (cube-root radius sampling)
+  - 3D simplex-noise turbulence on 3 independent planes drives per-particle velocity
+  - Perspective projection (`depth = FOCAL - rz`) — front particles larger/brighter
+  - Additive blending (`'lighter'`) — dim particles accumulate into glowing nebula
+  - Soft radius constraint keeps particles contained; lifetime fade-in/out/respawn
+  - idle = quiet blue sphere, listening = cyan, thinking = slow purple, speaking = 2 counter-rotating spheres
+- [x] ElevenLabs `ShimmeringText` — last utterance shimmers while speaking
+- [x] ElevenLabs dark colour theme (OKLCH CSS variables) throughout
+- [x] WebSocket-connected to FastAPI backend, demo mode when offline
+- [x] FastAPI serves `ui/dist/` (built bundle) at `/`
+- [x] Top bar: presence dot, mode badge, connection indicator
+- [x] Live transcript with user / HANUMAN turns
+- [x] Text input fallback for typed commands
+- [x] Demo mode cycles all four states when backend not connected
+- [x] `api/server.py` — FastAPI with WebSocket (`/ws`), `/status`, `/` serves UI
+- [x] `main.py` broadcasts state changes to all connected UI clients in real-time
+- [x] `simplex-noise` added for 3D Perlin noise in JS
+- [x] asyncio event loop bug fixed — voice thread now broadcasts status correctly
+- [x] WebSocket text handler: `think`, `synthesise`, `play` run via `run_in_executor`
+- [ ] `/mode` endpoint (get/set mode) — Phase 8
+- [ ] `/camera/snapshot` endpoint — Phase 3
+- [ ] Simple token authentication — future
+
+**Completed:** 2026-04-27 (async fixes: 2026-05-02)
+
+---
+
+## Voice Pipeline Fixes ✓ (2026-05-02)
+> Goal: HANUMAN actually hears you and responds intelligently.
+
+- [x] **asyncio event loop bug** — `_broadcast()` used `asyncio.get_event_loop()` from daemon thread (Python 3.9: returns wrong loop, silent failure). Fixed: `server.py` saves its loop at startup via `@app.on_event("startup")`; `get_loop()` exposes it; `main.py` uses it directly.
+- [x] **Energy gate too aggressive** — `peak_rms < 0.02` was filtering out the user's voice (actual voice RMS ~0.006). Lowered gate to `0.005` — blocks true silence, passes speech.
+- [x] **Whisper hallucination guard** — `vad_filter=True` (Silero VAD) strips non-speech before Whisper; known phantom phrase blocklist (`_HALLUCINATIONS`) discards common hallucinations.
+- [x] **TTS async error in WebSocket** — `synthesise()` uses `asyncio.run()` internally which fails inside uvicorn's event loop. Fixed: `synthesise` and `play` moved to `run_in_executor()` in the WebSocket handler.
+- [x] **Ollama response parsing** — old code used `response["message"]["content"]` (dict access); ollama library returns `ChatResponse` object. Fixed to `response.message.content`.
+- [x] **Mock LLM mode** — canned responses for UI testing, no API or model needed (`primary: mock`).
+- [x] Debug logging added to `listen()` — logs actual RMS so mic sensitivity can be tuned.
 
 ---
 
@@ -156,37 +201,6 @@
 
 ---
 
-## Web UI & API ✓ COMPLETE (v2 rebuilt 2026-04-27)
-> Goal: Interact with HANUMAN from any device on the network.
-
-- [x] `ui/` — React + Vite + TypeScript, 350 KB bundle (no Three.js)
-- [x] `ui/src/components/ui/particle-ring.tsx` — volumetric 3D particle sphere (Canvas 2D)
-  - Particula algorithm: uniform sphere-volume distribution (cube-root radius sampling)
-  - 3D simplex-noise turbulence on 3 independent planes drives per-particle velocity
-  - Perspective projection (`depth = FOCAL - rz`) — front particles larger/brighter
-  - Additive blending (`'lighter'`) — dim particles accumulate into glowing nebula
-  - Soft radius constraint keeps particles contained; lifetime fade-in/out/respawn
-  - idle = nothing, listening = 1 cyan sphere, thinking = 1 slow purple sphere
-  - speaking = 2 counter-rotating spheres with hue-cycling complementary colours
-- [x] ElevenLabs `ShimmeringText` — last utterance shimmers while speaking
-- [x] ElevenLabs dark colour theme (OKLCH CSS variables) throughout
-- [x] WebSocket-connected to FastAPI backend, demo mode when offline
-- [x] FastAPI serves `ui/dist/` (built bundle) at `/`
-- [x] Top bar: presence dot, mode badge, connection indicator
-- [x] Live transcript with user / HANUMAN turns
-- [x] Text input fallback for typed commands
-- [x] Demo mode cycles all four states when backend not connected
-- [x] `api/server.py` — FastAPI with WebSocket (`/ws`), `/status`, `/` serves UI
-- [x] `main.py` broadcasts state changes to all connected UI clients in real-time
-- [x] `simplex-noise` added for 3D Perlin noise in JS
-- [ ] `/mode` endpoint (get/set mode) — Phase 8
-- [ ] `/camera/snapshot` endpoint — Phase 3
-- [ ] Simple token authentication — future
-
-**Completed:** 2026-04-27
-
----
-
 ## Phase 10 — Raspberry Pi Migration
 > Goal: HANUMAN runs 24/7 on Pi, MacBook not required.
 
@@ -209,12 +223,17 @@
 | Date | Decision | Reason |
 |---|---|---|
 | 2026-04-26 | Voice: `en-GB-RyanNeural` | Tested against Indian English. British register fits JARVIS character better. |
-| 2026-04-26 | LLM: Claude API primary, Ollama fallback | Claude has vision + MCP connectors. Ollama for offline/free fallback. |
+| 2026-04-26 | LLM: Ollama primary, Claude API optional | Ollama is free, offline, and fast enough for daily use. Claude for vision + MCP. |
 | 2026-04-26 | No wake word | JARVIS never had one. Camera presence = activation trigger. |
 | 2026-04-26 | Modes deferred to Phase 8 | Infrastructure built in earlier phases; modes compose everything above. |
 | 2026-04-26 | Adaptive volume: 3 inputs | Noise + time + distance gives genuinely context-aware output. |
 | 2026-04-26 | Phase 0 complete | Voice loop working. Smoke test passed at 0.85 volume. HANUMAN spoke. |
-| 2026-04-26 | HUD UI — React + ElevenLabs UI | Converted to React/Vite. Using Orb, MicrophoneWaveform, ShimmeringText components + ElevenLabs dark theme. Built to dist/, served by FastAPI. |
+| 2026-04-26 | HUD UI — React + ElevenLabs UI | Converted to React/Vite. ElevenLabs dark theme. Built to dist/, served by FastAPI. |
 | 2026-04-27 | UI v2 — custom particle sphere replaces ElevenLabs Orb | Orb (Three.js/R3F) removed. Canvas 2D particle sphere using Particula algorithm: simplex-noise turbulence, perspective projection, additive blending. Bundle 1.24 MB → 350 KB. |
-| 2026-04-27 | Mock LLM mode added | `primary: mock` in settings.yaml lets the full voice pipeline run with no API key or Ollama. Canned HANUMAN-style responses for testing. |
-| 2026-04-27 | Python 3.9 compatibility fixes | `X \| None` union syntax replaced with `Optional[X]` throughout. anthropic/ollama imports deferred to call time so missing packages don't crash startup. |
+| 2026-04-27 | Mock LLM mode added | `primary: mock` in settings.yaml lets the full voice pipeline run with no API key or model. |
+| 2026-04-27 | Python 3.9 compatibility fixes | `X \| None` union syntax replaced with `Optional[X]` throughout. Imports deferred so missing packages don't crash startup. |
+| 2026-05-02 | Ollama as primary LLM | Installed via brew, `llama3.2:3b` pulled (~2GB). Free, offline, fast on M4. Claude remains available when API key set. |
+| 2026-05-02 | asyncio event loop fix | `_broadcast()` in voice thread was silently failing — wrong loop from `get_event_loop()`. Fixed by saving the running loop at server startup and sharing via `get_loop()`. |
+| 2026-05-02 | STT energy gate lowered 0.02 → 0.005 | User's mic produces ~0.006 RMS for normal speech. Old gate was 3× too high and silently swallowed every word. VAD filter handles true silence. |
+| 2026-05-02 | Ollama response parsing fixed | `ollama.chat()` returns a `ChatResponse` object, not a dict. Fixed `response["message"]["content"]` → `response.message.content`. |
+| 2026-05-02 | WebSocket handler async fix | `synthesise()` uses `asyncio.run()` internally, which fails inside uvicorn's event loop. Moved to `loop.run_in_executor()` in server.py. |

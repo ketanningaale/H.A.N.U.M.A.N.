@@ -17,7 +17,7 @@ A fully local, voice-first AI assistant inspired by J.A.R.V.I.S. from Iron Man a
 - **Persistent memory** — remembers facts, preferences, and context across sessions.
 - **Tool use** — web search, calendar, Gmail, file management, notes, system status.
 - **Smart lights** — controls lights via Home Assistant, shifting profiles with modes.
-- **Claude-powered** — uses Claude API for reasoning and vision, Ollama as a free offline fallback.
+- **Dual LLM** — Ollama (free, offline, primary) + Claude API (vision, MCP tools, fallback).
 - **Modes** — NORMAL, FOCUS, NIGHT, WINDDOWN, MOODY, MORNING, AWAY.
 - **RPi-ready** — designed from day one to migrate to Raspberry Pi 5.
 
@@ -38,10 +38,10 @@ A fully local, voice-first AI assistant inspired by J.A.R.V.I.S. from Iron Man a
 
 | Layer | Technology |
 |---|---|
-| LLM (primary) | Claude API — `claude-sonnet-4-6` |
-| LLM (fallback) | Ollama — `llama3:8b` (M4) / `phi3:mini` (RPi) |
+| LLM (primary) | Ollama — `llama3.2:3b` (M4) / `phi3:mini` (RPi) |
+| LLM (cloud / vision / MCP) | Claude API — `claude-sonnet-4-6` |
 | LLM (testing) | Mock engine — canned responses, no API needed |
-| Speech-to-Text | `faster-whisper` |
+| Speech-to-Text | `faster-whisper` (medium on M4, tiny on RPi) |
 | Text-to-Speech | `edge-tts` (M4) / `piper-tts` (RPi) |
 | Voice | `en-GB-RyanNeural` |
 | Camera | OpenCV + RTSP |
@@ -68,7 +68,7 @@ H.A.N.U.M.A.N/
 ├── memory/          # Short-term buffer + long-term SQLite store
 ├── faces/           # Stored face encodings (private, gitignored)
 ├── api/             # FastAPI server
-├── ui/              # Browser interface
+├── ui/              # React + Vite browser interface
 ├── scripts/         # Install scripts for M4 and RPi
 └── tests/           # Test suite
 ```
@@ -89,17 +89,19 @@ pip install -r requirements.txt
 ### 2. Configure
 ```bash
 cp .env.example .env
-# Add your Anthropic API key and camera RTSP URL
+# ANTHROPIC_API_KEY is optional — Ollama runs fully offline
 ```
 
-> **No API key yet?** Set `primary: mock` in `config/settings.yaml` to run the full
-> voice pipeline with canned responses — no Claude or Ollama needed.
-
-### 3. Install Ollama (offline fallback — optional)
+### 3. Install Ollama and pull the model
 ```bash
-# Install from https://ollama.com
-ollama pull llama3:8b
+brew install ollama              # macOS — see https://ollama.com for other platforms
+brew services start ollama
+ollama pull llama3.2:3b          # ~2GB — runs well on M4 and RPi 5
 ```
+
+> **No Ollama?** Set `primary: mock` in `config/settings.yaml` to run with canned responses — no model needed.
+
+> **Have an Anthropic API key?** Set `primary: claude` in `config/settings.yaml` and add your key to `.env` for the best experience (vision, MCP tools, superior reasoning).
 
 ### 4. Register your face
 ```bash
@@ -108,6 +110,8 @@ python scripts/register_face.py
 
 ### 5. Run HANUMAN
 ```bash
+brew services start ollama       # if not already running
+source .venv/bin/activate
 python main.py
 ```
 
@@ -123,27 +127,17 @@ Then open **http://localhost:8000** in your browser to see the HUD.
 > ```
 
 ---
-> **UI development mode** (hot reload):
-> ```bash
-> cd ui && npm run dev   # http://localhost:5173 — proxies /ws to FastAPI
-> ```
-> **Rebuild UI after changes:**
-> ```bash
-> cd ui && npm run build
-> ```
-
----
 
 ## Configuration
 
-All tunable parameters live in `config/settings.yaml`. Switching from M4 to RPi is a config change — not a code change.
+All tunable parameters live in `config/settings.yaml`. Switching from M4 to RPi is a config change, not a code change.
 
 Key settings:
 ```yaml
 llm:
-  primary: claude          # "claude" or "ollama"
+  primary: ollama                # "ollama", "claude", or "mock"
+  ollama_model: llama3.2:3b     # phi3:mini for RPi
   claude_model: claude-sonnet-4-6
-  ollama_model: llama3:8b  # phi3:mini for RPi
 
 tts:
   voice: en-GB-RyanNeural
@@ -157,7 +151,7 @@ camera:
 ## Environment Variables
 
 ```
-ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_API_KEY=sk-ant-...        # optional — only needed for Claude mode
 CAMERA_RTSP_URL=rtsp://...
 HOME_ASSISTANT_TOKEN=...
 GOOGLE_CALENDAR_CREDENTIALS=path/to/credentials.json
