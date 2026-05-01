@@ -1,8 +1,8 @@
 llm:
-  primary: mock                          # "claude", "ollama", or "mock" (no API needed)
-  # primary: claude                      # uncomment when API key is ready
+  primary: ollama                        # "claude", "ollama", or "mock"
+  # primary: claude                      # uncomment when Anthropic API key is ready
   claude_model: claude-sonnet-4-6
-  ollama_model: llama3:8b                # change to phi3:mini for RPi
+  ollama_model: llama3.2:3b             # change to phi3:mini for RPi
   ollama_host: http://localhost:11434
   context_window: 4096
   offline_fallback: true                 # fall back to ollama if claude unreachable

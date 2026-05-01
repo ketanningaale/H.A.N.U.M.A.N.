@@ -43,8 +43,8 @@ def record(duration_s: float = 5.0, sample_rate: int = 16000) -> np.ndarray:
 
 def record_until_silence(
     sample_rate: int = 16000,
-    silence_threshold: float = 0.01,
-    silence_duration_s: float = 1.5,
+    silence_threshold: float = 0.010,  # RMS below this = silence
+    silence_duration_s: float = 1.2,
     max_duration_s: float = 30.0,
     chunk_s: float = 0.3,
 ) -> np.ndarray:
@@ -75,14 +75,24 @@ def record_until_silence(
     return np.concatenate(chunks)
 
 
+# Whisper's known hallucination phrases on silence — discard these
+_HALLUCINATIONS = {
+    "thanks for watching", "thank you for watching", "thank you.",
+    "thanks for watching!", "you", ".", "", "subscribing", "bye",
+}
+
 def transcribe(audio: np.ndarray, sample_rate: int = 16000) -> str:
     """Transcribe a numpy audio array to text."""
     model = _get_model()
 
-    # Write to a temp wav so faster-whisper can read it
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
         sf.write(tmp.name, audio, sample_rate)
-        segments, _ = model.transcribe(tmp.name, language=_cfg().get("language", "en"))
+        segments, _ = model.transcribe(
+            tmp.name,
+            language=_cfg().get("language", "en"),
+            vad_filter=True,           # Silero VAD — strips non-speech before Whisper sees it
+            vad_parameters={"min_silence_duration_ms": 500},
+        )
         text = " ".join(seg.text.strip() for seg in segments).strip()
 
     logger.info(f"Transcribed: '{text}'")
@@ -90,6 +100,21 @@ def transcribe(audio: np.ndarray, sample_rate: int = 16000) -> str:
 
 
 def listen() -> str:
-    """Record until silence, then transcribe. Returns the spoken text."""
+    """Record until silence, then transcribe. Returns spoken text or '' if silence/hallucination."""
     audio = record_until_silence()
-    return transcribe(audio)
+
+    # Energy gate — skip transcription if audio is too quiet (ambient noise only)
+    peak_rms = float(np.sqrt(np.mean(audio ** 2)))
+    logger.debug(f"Audio RMS: {peak_rms:.4f}")
+    if peak_rms < 0.005:
+        logger.debug(f"Audio too quiet (RMS {peak_rms:.4f}), skipping transcription.")
+        return ""
+
+    text = transcribe(audio)
+
+    # Discard known Whisper hallucinations
+    if text.lower().strip().rstrip(".!?,") in _HALLUCINATIONS:
+        logger.debug(f"Discarding hallucination: '{text}'")
+        return ""
+
+    return text

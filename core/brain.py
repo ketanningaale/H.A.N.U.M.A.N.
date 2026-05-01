@@ -104,4 +104,5 @@ def _ollama(system: str, messages: list[dict], cfg: dict) -> str:
         model=cfg["ollama_model"],
         messages=full_messages,
     )
-    return response["message"]["content"].strip()
+    # ollama library returns a ChatResponse object (not a dict)
+    return response.message.content.strip()

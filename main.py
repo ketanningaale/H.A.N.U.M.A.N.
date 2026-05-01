@@ -17,13 +17,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     datefmt="%H:%M:%S",
 )
 logger = logging.getLogger("hanuman")
 
-from api.server import manager
+from api.server import manager, get_loop
 from core.brain import think
 from core.context import ConversationContext
 from input.stt import listen
@@ -41,19 +41,21 @@ def _cfg():
 
 def _broadcast(status: str):
     """Fire-and-forget state broadcast to UI from the sync voice thread."""
+    loop = get_loop()
+    if loop is None:
+        return  # server not yet started — ignore
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            asyncio.run_coroutine_threadsafe(manager.set_state(status=status), loop)
+        asyncio.run_coroutine_threadsafe(manager.set_state(status=status), loop)
     except Exception:
         pass  # UI broadcast is best-effort — never block the voice loop
 
 
 def _broadcast_message(role: str, text: str):
+    loop = get_loop()
+    if loop is None:
+        return
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            asyncio.run_coroutine_threadsafe(manager.send_message(role, text), loop)
+        asyncio.run_coroutine_threadsafe(manager.send_message(role, text), loop)
     except Exception:
         pass
 

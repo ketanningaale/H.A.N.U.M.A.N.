@@ -3,7 +3,7 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
@@ -12,6 +12,20 @@ from fastapi.staticfiles import StaticFiles
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="HANUMAN", docs_url=None, redoc_url=None)
+
+# The running event loop — saved at startup so the voice thread can schedule onto it
+_loop: Optional[asyncio.AbstractEventLoop] = None
+
+
+def get_loop() -> Optional[asyncio.AbstractEventLoop]:
+    """Return the server's running event loop (usable from any thread)."""
+    return _loop
+
+
+@app.on_event("startup")
+async def _save_loop():
+    global _loop
+    _loop = asyncio.get_running_loop()
 
 # Serve the built React app (ui/dist)
 _dist = Path(__file__).parent.parent / "ui" / "dist"
@@ -107,18 +121,23 @@ async def websocket_endpoint(ws: WebSocket):
                 try:
                     ctx = ConversationContext()
                     ctx.add_user(text)
-                    response = think(ctx.messages())
+                    # think() is sync — run in executor so it doesn't block the event loop
+                    loop = asyncio.get_running_loop()
+                    response = await loop.run_in_executor(None, think, ctx.messages())
                     ctx.add_assistant(response)
 
                     await manager.send_message("assistant", response)
                     await manager.set_state(status="speaking")
 
-                    path = synthesise(response)
-                    play(path, volume=get_volume())
+                    # synthesise() uses asyncio.run() internally — must run in a thread
+                    import functools
+                    path = await loop.run_in_executor(None, synthesise, response)
+                    vol = get_volume()
+                    await loop.run_in_executor(None, functools.partial(play, path, volume=vol))
 
                     await manager.set_state(status="idle")
                 except Exception as e:
-                    logger.error(f"Error handling message: {e}")
+                    logger.error(f"Error handling message: {e}", exc_info=True)
                     await manager.set_state(status="idle")
 
     except WebSocketDisconnect:
